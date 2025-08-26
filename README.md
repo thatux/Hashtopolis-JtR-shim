@@ -28,34 +28,29 @@ The repo uses `git lfs` to store the large `7z` file. Make sure you have [git lf
 git lfs pull
 ```
 
-## 1. Clone Hashtopolis Server
+## 1. Clone Hashtopolis Server and start container
 ```
 git clone https://github.com/hashtopolis/server
 cd server
 code .
 ```
+Open the VSCode's dev container (`Ctrl + Shift + P` → "Open Folder in Container"). Wait for the logs to load.
 
-## 2. Update `docker-entrypoint.sh` to Disable SSL
-In the `docker-entrypoint.sh` file, add `--skip-ssl` to the MYSQL command:
-```
-MYSQL="mysql -u${HASHTOPOLIS_DB_USER} -p${HASHTOPOLIS_DB_PASS} -h ${HASHTOPOLIS_DB_HOST} --skip-ssl"
-```
-Reopen in VSCode's dev container (`Ctrl + Shift + P` → "Open Folder in Container"). Wait for the logs to load.
 
-## 3. Access the webinterface and add `devvoucher`
-Once the dev container is opened, re-run the project (`F5` in VSCode) try to access the Hashtopolis UI at:
+## 2. Access the webinterface and add a voucher
+Once the dev container is opened, re-run the project (`F5` in VSCode) try to access the Hashtopolis webinterface at:
 ```
 http://127.0.0.1:8080/agents.php?new=true 
 ```
-If this host is unreachable, run `docker-entrypoint.sh` in the terminal and read the output. It may direct you to a different endpoint or show an error to resolve first. 
-
-When the endpoint is accessible log in using:
+And log in with the following credentials: 
 - user: `admin`
 - password: `hashtopolis`
 
-Next, in the **Add new agent** webinterface, add a new voucher with the string `devvoucher`.
+If the host is unreachable try looking at the docker logs using the `docker logs` command in a terminal and read the output to resolve any possible errors.
 
-## 4. Set Up Hashtopolis Python Agent
+Next, in the **Add new agent** webinterface, add a new voucher. The vouchers will not expire in the Hashtopolis dev container.
+
+## 3. Set Up Hashtopolis Python Agent
 Clone the Hashtopolis Python agent repository and open it in VSCode:
 
 ```
@@ -64,46 +59,43 @@ cd agent-python
 code .
 ```
 
-Next, replace all the `\t` characters in the code-base (use `Ctrl + Shift + H` to search and replace in all files with VSCode ) :
-- Search for `-p "\t"` and replace it with `-p "0x09"`
-- Search for `args.append('"\t"')` and replace it with `args.append('"0x09"')`
-
 Reopen in the dev container (`Ctrl + Shift + P` → "Open Folder in Container") and run it once. This may take a while, look at the logs to see the progress.
 
-Run the project once (`F5` in VSCode) and read the logs. It will probably not be able to find the server but it should have created the file `config.json`. 
+Run the project once (`F5` in VSCode). It will not be able to find the server for the first run, but it will create a file called `config.json` which needs to be edited.
 
-Edit `config.json` and update the `"url"` field to:
+Edit `config.json` by updating the `"url"` field:
 
 ```
 "url": "http://hashtopolis-server-dev/api/server.php"
 ```
+Run the project again (`F5` in VSCode) and the Hashtopolis agent should be waiting for tasks to pick up. 
 
-Run it again and now the agent should succesfully connect.
-
-## 5. Copy JtR-Shim to hashtopolis-server
+## 4. Copy JtR-Shim to hashtopolis-server
+Now the John The Ripper shim can be added as cracker to Hashtopolis.
 In the Hashtopolis server directory, create a `crackers` folder:
 ```
 mkdir src/static/crackers
 ```
-Copy the Hashtopolis-JtR Shim Agent archive to the `crackers` folder:
+Copy the Hashtopolis-JtR Shim Agent (`Hashtopolis-JtR-shim-agent.7z`) to the `crackers` folder:
 ```
 cp Hashtopolis-JtR-shim-agent.7z src/static/crackers
 ```
-You can now download it from the following URL:
+To verify if it is added correctly, check if the `7z` can be downloaded through the following url:
 ```
 http://127.0.0.1:8080/static/crackers/Hashtopolis-JtR-shim-agent.7z
 ```
-## 6. Add the Cracker to Hashtopolis
+## 5. Add the Cracker to Hashtopolis
 To add a new cracker, navigate to:
 ```
 http://127.0.0.1:8080/crackers.php?id=1&new=true
 ```
-Select version 7.0.0, and choose **hashcat**. Enter the following path for the cracker file:
-```
-http://hashtopolis-server-dev/static/crackers/Hashtopolis-JtR-shim-agent.7z
-```
+And fill in the information as follows:
+- **Binary Version:** `7.0.0`
+- **Binary Base name:** `hashcat`
+- **Download URL:** `http://hashtopolis-server-dev/static/crackers/Hashtopolis-JtR-shim-agent.7z`
 
-## 7. Add a New MD5 Hashlist to Hashtopolis
+## 6. Add a New MD5 Hashlist to Hashtopolis
+To verify if the new cracker works, add a test-hash to Hashtopolis.
 Create a new hashlist in the Hashtopolis webinterface by navigating to:
 ```
 http://127.0.0.1:8080/hashlists.php?new=true
@@ -112,26 +104,25 @@ Add a new hashlist of hashtype `MD5` with the following hash:
 ```
 8743b52063cd84097a65d1633f5c74f5
 ```
-Add a new task to Hashtopolis by navigating to:
+
+## 7. Crack the hash with John the Ripper
+- Add a new task to Hashtopolis by navigating to:
 ```
 http://127.0.0.1:8080/tasks.php?new=true
 ```
-Select the created `MD5` hashlist and enter the following in the `Command line` field:
+- Select the created `MD5` hashlist and enter the following in the `Command line` field:
 ```
 #HL# -a3 h?l?l?l?l?l?l
 ```
-Set the `Priority` to any number higher than 0 .
+- Set the `Priority` to any number higher than 0 
+- Set the `Binary type to run task` to `hashcat` and `7.0.0`
 
-
-The agent should now download and execute the new cracker. Look at the logs in the VSCode window which has the Hashtopolis Agent codebase open.  
-
-If you get **'Speed benchmark failed!'** double-check the replacements (`ctrl-shift-h`) made to the Python agent. Are all:  
-- `-p "\t"` replaced to `-p "0x09"`
-- `-p \"\t\"` replaced to `-p \"0x09\"` 
--  `args.append('"\t"')` replaced to `args.append('"0x09"')` 
-
+The agent should now download and execute the new cracker. 
+Look at the logs of the Hashtopolis Agent (which is likely already open in VSCode).  
 
 ## Future work
+This PoC is only to demonstrate John The Ripper *can* be used in Hashtopolis. It is not production ready at all.
+Here are a few things for improvement:
  - Refactor the [agent-python/htpclient/hashcat_cracker.py](https://github.com/hashtopolis/agent-python/blob/master/htpclient/hashcat_cracker.py) script to create a `john_cracker.py`. This will provide better flexibility and allow for the following:
     - Use the `--node` option in JtR
     - Parse and report JtR's status output (currently only the progress is reported as 100%)
