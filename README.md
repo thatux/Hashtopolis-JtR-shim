@@ -22,7 +22,8 @@ By deploying the 7z in the following Hashtopolis versions:
 To test this locally, start with installing VSCode, together with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers). The remaining instructions for setup are based on the [Hashtopolis development environment wiki](https://github.com/hashtopolis/server/wiki/Development-environment) .
 
 ## 0. Pull this repository
-Make sure to pull large files from this repository:
+The repo uses `git lfs` to store the large `7z` file. Make sure you have [git lfs](https://docs.github.com/en/repositories/working-with-files/managing-large-files/installing-git-large-file-storage) installed. Then use `git lfs` on the repsository by pulling the large zip file:
+
 ```
 git lfs pull
 ```
