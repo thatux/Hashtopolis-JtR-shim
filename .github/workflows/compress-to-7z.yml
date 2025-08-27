@@ -39,6 +39,7 @@ jobs:
           cd ./src/john
           git checkout 53674043c9cf4ece82a649e4f5834fd52f602935
           # Build John the Ripper (example for Linux)
+          cd src
           ./configure
           make -s clean && make -s
 
