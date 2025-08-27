@@ -17,7 +17,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y p7zip-full curl git
+          sudo apt-get install -y p7zip-full curl git build-essential
 
       - name: Download Hashcat v7.1.2
         run: |
@@ -32,12 +32,15 @@ jobs:
             ln -sf process.sh hashcat.bin
           fi
 
-      - name: Clone John the Ripper (specific commit)
+      - name: Clone and Build John the Ripper
         run: |
           mkdir -p src
           git clone https://github.com/openwall/john.git ./src/john
           cd ./src/john
           git checkout 53674043c9cf4ece82a649e4f5834fd52f602935
+          # Build John the Ripper (example for Linux)
+          ./configure
+          make -s clean && make -s
 
       - name: Create 7z archive of src/
         run: |
@@ -49,4 +52,3 @@ jobs:
         with:
           name: Hashtopolis-JtR-shim-agent${{ github.sha }}
           path: output/Hashtopolis-JtR-shim-agent.7z
-
