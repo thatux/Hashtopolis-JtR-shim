@@ -1,0 +1,52 @@
+name: Download Hashcat & John the Ripper into src/, then create 7z archive
+
+on:
+  workflow_dispatch: # manual trigger
+  push:
+    branches:
+      - github_actions
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y p7zip-full curl git
+
+      - name: Download Hashcat v7.1.2
+        run: |
+          curl -L "https://github.com/hashcat/hashcat/releases/download/v7.1.2/hashcat-7.1.2.7z" -o hashcat.7z
+          mkdir -p src
+          7z x hashcat.7z -o./src/
+          mv ./src/hashcat-7.1.2/* ./src/
+          rm -r ./src/hashcat-7.1.2
+          # Rename hashcat.bin -> hashcat (if it exists)
+          if [ -f ./src/hashcat.bin ]; then
+            mv ./src/hashcat.bin ./src/hashcat
+            ln -sf process.sh hashcat.bin
+          fi
+
+      - name: Clone John the Ripper (specific commit)
+        run: |
+          mkdir -p src
+          git clone https://github.com/openwall/john.git ./src/john
+          cd ./src/john
+          git checkout 53674043c9cf4ece82a649e4f5834fd52f602935
+
+      - name: Create 7z archive of src/
+        run: |
+          mkdir -p output
+          7z a output/Hashtopolis-JtR-shim-agent.7z ./src/*
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Hashtopolis-JtR-shim-agent${{ github.sha }}
+          path: output/Hashtopolis-JtR-shim-agent.7z
+
