@@ -48,8 +48,30 @@ jobs:
           mkdir -p output
           7z a output/Hashtopolis-JtR-shim-agent.7z ./src/* -snl *
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Hashtopolis-JtR-shim-agent${{ github.sha }}
-          path: output/Hashtopolis-JtR-shim-agent.7z
+      - name: Create GitHub Release
+        id: create_release
+        run: |
+          RELEASE_NAME="Hashtopolis-JtR-shim-agent-${{ github.sha }}"
+          RELEASE_TAG="${{ github.sha }}"
+          BODY="Release created by GitHub Actions"
+          
+          # Create a release
+          RESPONSE=$(curl -s -X POST \
+          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Content-Type: application/json" \
+          -d '{"tag_name": "'"${RELEASE_TAG}"'", "name": "'"${RELEASE_NAME}"'", "body": "'"${BODY}"'", "draft": false, "prerelease": false}' \
+          https://api.github.com/repos/${{ github.repository }}/releases)
+          
+          echo "::set-output name=release_id::$(echo $RESPONSE | jq .id)"
+
+      - name: Upload .7z as release asset
+        run: |
+          RELEASE_ID=${{ steps.create_release.outputs.release_id }}
+          echo "Uploading release asset..."
+          
+          # Upload the .7z file to the release
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/zip" \
+            --data-binary @output/Hashtopolis-JtR-shim-agent-${{ github.sha }}.7z \
+            "https://uploads.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID/assets?name=Hashtopolis-JtR-shim-agent-${{ github.sha }}.7z"
