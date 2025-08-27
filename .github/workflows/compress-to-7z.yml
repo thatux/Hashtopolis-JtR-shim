@@ -23,6 +23,8 @@ jobs:
           curl -L "https://github.com/hashcat/hashcat/releases/download/v7.1.2/hashcat-7.1.2.7z" -o hashcat.7z
           mkdir -p src
           7z x hashcat.7z -o./src/
+          mv ./src/hashcat-7.1.2/* ./src/
+          rm -r ./src/hashcat-7.1.2
           # Rename hashcat.bin -> hashcat (if it exists)
           if [ -f ./src/hashcat/hashcat.bin ]; then
             mv ./src/hashcat/hashcat.bin ./src/hashcat/hashcat
@@ -39,10 +41,10 @@ jobs:
       - name: Create 7z archive of src/
         run: |
           mkdir -p output
-          7z a output/Hashtopolis-JtR-shim-agent.7z ./src/*
+          7z a output/Hashtopolis-JtR-shim-agent.7z -snl ./src/*
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v2
         with:
-          name: Hashtopolis-JtR-shim-agent${{ github.sha }}
-          path: output/Hashtopolis-JtR-shim-agent.7z
+          tag_name: ${{ github.sha }}
+          files: output/Hashtopolis-JtR-shim-agent.7z
