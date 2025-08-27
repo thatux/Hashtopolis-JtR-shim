@@ -42,7 +42,7 @@ jobs:
       - name: Create 7z archive of src/
         run: |
           mkdir -p output
-          7z a output/Hashtopolis-JtR-shim-agent.7z ./src/*
+          7z a output/Hashtopolis-JtR-shim-agent.7z ./src/* -snl *
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
