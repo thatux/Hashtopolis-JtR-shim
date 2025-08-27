@@ -44,9 +44,10 @@ jobs:
           mkdir -p output
           7z a output/Hashtopolis-JtR-shim-agent.7z ./src/*
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v1
         with:
-          name: Hashtopolis-JtR-shim-agent${{ github.sha }}
-          path: output/Hashtopolis-JtR-shim-agent.7z
+          files: output/Hashtopolis-JtR-shim-agent.7z
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
