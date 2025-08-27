@@ -44,6 +44,12 @@ jobs:
           mkdir -p output
           7z a output/Hashtopolis-JtR-shim-agent.7z ./src/*
 
+      - name: Handle GitHub release
+        run: |
+          # Create a tag
+          git tag v$(date +'%Y%m%d%H%M%S')  # Creates a unique tag based on the current timestamp
+          git push origin v$(date +'%Y%m%d%H%M%S')  # Pushes the tag to the remote repository
+
       - name: Upload release asset
         uses: softprops/action-gh-release@v1
         with:
