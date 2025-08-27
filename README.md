@@ -10,7 +10,7 @@ Default example is md5, edit `process.sh` and change `--format=raw-md5` for othe
 
 ## Support
 This PoC is using the following versions of Hashcat and JtR:
-* Hashcat [bb27e85faec3343a26f2d475708f6f38d6245e38](https://github.com/hashcat/hashcat/tree/bb27e85faec3343a26f2d475708f6f38d6245e38)
+* [Hashcat 7.1.2](https://github.com/hashcat/hashcat/releases/download/v7.1.2/hashcat-7.1.2.7z)
 * JohnTheRipper [53674043c9cf4ece82a649e4f5834fd52f602935](https://github.com/openwall/john/tree/53674043c9cf4ece82a649e4f5834fd52f602935)
 
 By deploying the 7z in the following Hashtopolis versions:
@@ -21,12 +21,15 @@ By deploying the 7z in the following Hashtopolis versions:
 # Setting Up JtR-Shim Locally with Dev Containers & Docker
 To test this locally, start with installing VSCode, together with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers). The remaining instructions for setup are based on the [Hashtopolis development environment wiki](https://github.com/hashtopolis/server/wiki/Development-environment) .
 
-## 0. Pull this repository
-The repo uses `git lfs` to store the large `7z` file. Make sure you have [git lfs](https://docs.github.com/en/repositories/working-with-files/managing-large-files/installing-git-large-file-storage) installed. Then use `git lfs` on the repsository by pulling the large zip file:
-
+## 0. Get the JtR shim cracker
+Get the Hashtopolis-JohnTheRipper-shim cracker to add later to Hashtopolis:
+Artifacts are available from the [GitHub Actions runs](/actions/).
+- Open the latest successful run and download the `Hashtopolis-JtR-shim-agent` artifact.
+- Unzip the `Hashtopolis-JtR-shim-agent-$GIT-COMMIT-HASH.zip` with 
+```commandline
+unzip Hashtopolis-JtR-shim-agent-$GIT-COMMIT-HASH.zip
 ```
-git lfs pull
-```
+such that you end up with the resulting file: `Hashtopolis-JtR-shim-agent.7z`. This file will be added as a cracker to Hashtopolis later.
 
 ## 1. Clone Hashtopolis Server and start container
 ```
