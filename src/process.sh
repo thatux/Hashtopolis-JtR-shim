@@ -8,6 +8,8 @@ rm ./john/run/john.pot 2>/dev/null #always start with empty potfile..
 
 # Read full input line(s) from stdin
 input="$*"
+# Subsitute content after -p flag with real tab character
+input=$(echo "$input" | sed 's/-p /-p0x09 /g')
 
 # Define the expected start prefix string
 prefix="--machine-readable --quiet --status --restore-disable --session=hashtopolis --status-timer 5"
