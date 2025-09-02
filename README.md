@@ -17,16 +17,11 @@ By deploying the 7z in the following Hashtopolis versions:
 * Hashtopolis server [aadb30798299cc1b4b0ad2d7ef20c7ca307094c0](https://github.com/hashtopolis/server/tree/aadb30798299cc1b4b0ad2d7ef20c7ca307094c0)
 * Hashtopolis python-agent [e2e7acb39755d12c5349a7c86cfa5c63af867ae6](https://github.com/hashtopolis/agent-python/tree/e2e7acb39755d12c5349a7c86cfa5c63af867ae6)
 
+# Getting the cracker
+To get the John The Ripper as a cracker for hashtopolis, download the (preferably the latest) github artifact of this repo, e.g.:
+- [Github Artifact 17259471161](https://github.com/thatux/Hashtopolis-JtR-shim/actions/runs/17259471161/artifacts/3860718845)
 
-# Setting Up JtR-Shim Locally with Dev Containers & Docker
-To test this locally, start with installing VSCode, together with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers). The remaining instructions for setup are based on the [Hashtopolis development environment wiki](https://github.com/hashtopolis/server/wiki/Development-environment) .
-
-## 0. Pull this repository
-The repo uses `git lfs` to store the large `7z` file. Make sure you have [git lfs](https://docs.github.com/en/repositories/working-with-files/managing-large-files/installing-git-large-file-storage) installed. Then use `git lfs` on the repsository by pulling the large zip file:
-
-```
-git lfs pull
-```
+Unzip the file and keep the resulting 7z called `Hashtopolis-JtR-shim-agent.7z`. This will be added as a cracker to Hashtopolis when you follow te instructions below. 
 
 ## 1. Clone Hashtopolis Server and start container
 ```
@@ -36,6 +31,8 @@ code .
 ```
 Open the VSCode's dev container (`Ctrl + Shift + P` → "Open Folder in Container"). Wait for the logs to load.
 
+# Setup Hashtopolis locally to test the John The Ripper cracker
+The cracker is just a PoC, so it is advised to only test its purpose within a local environment.
 
 ## 2. Access the webinterface and add a voucher
 Once the dev container is opened, re-run the project (`F5` in VSCode) try to access the Hashtopolis webinterface at:

@@ -1,0 +1,72 @@
+name: Download Hashcat & John the Ripper into src/, then create 7z archive
+
+on:
+  workflow_dispatch: # manual trigger
+  push:
+    branches:
+      - github_actions_without_conflicts
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y p7zip-full curl git build-essential
+
+      - name: Download Hashcat v7.1.2
+        run: |
+          curl -L "https://github.com/hashcat/hashcat/releases/download/v7.1.2/hashcat-7.1.2.7z" -o hashcat.7z
+          mkdir -p src
+          7z x hashcat.7z -o./src/
+          mv ./src/hashcat-7.1.2/* ./src/
+          rm -r ./src/hashcat-7.1.2
+          # Rename hashcat.bin -> hashcat (if it exists)
+          if [ -f ./src/hashcat.bin ]; then
+            mv ./src/hashcat.bin ./src/hashcat
+            ln -sf process.sh hashcat.bin
+          fi
+
+      - name: Clone and Build John the Ripper
+        run: |
+          mkdir -p src
+          git clone https://github.com/openwall/john.git ./src/john
+          cd ./src/john
+          git checkout 53674043c9cf4ece82a649e4f5834fd52f602935
+          # Build John the Ripper (example for Linux)
+          cd src
+          ./configure
+          make -s clean && make -s
+
+      - name: Create 7z archive of src/
+        run: |
+          mkdir -p output
+          7z a output/Hashtopolis-JtR-shim-agent.7z ./src/* -snl *
+
+      - name: Create Release
+        id: create_release
+        uses: comnoco/create-release@v2
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+            tag_name: ${{ github.ref }}
+            release_name: Release ${{ github.ref }}
+            body: |
+              Attempt to create a release
+            prerelease: false
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: output/Hashtopolis-JtR-shim-agent-${{ github.sha }}.7z
+          asset_name: Hashtopolis-JtR-shim-agent-${{ github.sha }}.7z
+          asset_content_type: application/zip
